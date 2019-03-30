@@ -48,6 +48,9 @@
 #include <sensor_msgs/image_encodings.h>
 #include <Eigen/StdVector>
 
+#include <chrono>
+#include <thread>
+
 using namespace alvar;
 using namespace std;
 
@@ -311,7 +314,7 @@ void getCapCallback (const sensor_msgs::ImageConstPtr & image_msg)
 
 	//Sleep if we are auto collecting
 	if(auto_collect)
-		usleep(1000000);
+		std::this_thread::sleep_for(std::chrono::microseconds(1000000));
 }
 
 

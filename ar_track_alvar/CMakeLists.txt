@@ -74,7 +74,10 @@ include_directories(include
 
 set(GENCPP_DEPS ar_track_alvar_msgs_gencpp std_msgs_gencpp sensor_msgs_gencpp geometry_msgs_gencpp visualization_msgs_gencpp)
 
-add_library(ar_track_alvar
+if(WIN32)
+  set(BUILD_SHARED_LIBS FALSE)
+  add_definitions(-DALVAR_STATIC)
+  add_library(ar_track_alvar
     src/Camera.cpp
     src/CaptureDevice.cpp
     src/Pose.cpp
@@ -85,17 +88,17 @@ add_library(ar_track_alvar
     src/CvTestbed.cpp
     src/CaptureDevice.cpp
     src/CaptureFactory.cpp
-    src/CaptureFactory_unix.cpp
+    src/CaptureFactory_win.cpp
     src/FileFormatUtils.cpp
     src/Threads.cpp
-    src/Threads_unix.cpp
+    src/Threads_win.cpp
     src/Mutex.cpp
-    src/Mutex_unix.cpp
+    src/Mutex_win.cpp
     src/ConnectedComponents.cpp
     src/Line.cpp src/Plugin.cpp
-    src/Plugin_unix.cpp
+    src/Plugin_win.cpp
     src/DirectoryIterator.cpp
-    src/DirectoryIterator_unix.cpp
+    src/DirectoryIterator_win.cpp
     src/Draw.cpp
     src/Util.cpp
     src/Filter.cpp
@@ -105,6 +108,39 @@ add_library(ar_track_alvar
     src/MultiMarker.cpp
     src/MultiMarkerBundle.cpp
     src/MultiMarkerInitializer.cpp)
+else()
+  add_library(ar_track_alvar
+      src/Camera.cpp
+      src/CaptureDevice.cpp
+      src/Pose.cpp
+      src/Marker.cpp
+      src/MarkerDetector.cpp
+      src/Bitset.cpp
+      src/Rotation.cpp
+      src/CvTestbed.cpp
+      src/CaptureDevice.cpp
+      src/CaptureFactory.cpp
+      src/CaptureFactory_unix.cpp
+      src/FileFormatUtils.cpp
+      src/Threads.cpp
+      src/Threads_unix.cpp
+      src/Mutex.cpp
+      src/Mutex_unix.cpp
+      src/ConnectedComponents.cpp
+      src/Line.cpp src/Plugin.cpp
+      src/Plugin_unix.cpp
+      src/DirectoryIterator.cpp
+      src/DirectoryIterator_unix.cpp
+      src/Draw.cpp
+      src/Util.cpp
+      src/Filter.cpp
+      src/Kalman.cpp
+      src/kinect_filtering.cpp
+      src/Optimization.cpp
+      src/MultiMarker.cpp
+      src/MultiMarkerBundle.cpp
+      src/MultiMarkerInitializer.cpp)
+endif()
 target_link_libraries(ar_track_alvar ${OpenCV_LIBS} ${TinyXML_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(ar_track_alvar ${GENCPP_DEPS})
 
@@ -163,9 +199,13 @@ if (CATKIN_ENABLE_TESTING)
   find_package(catkin REQUIRED COMPONENTS roslaunch rostest)
   
   file(GLOB LAUNCH_FILES launch/*.launch test/*.test)
+
+  # this is breaking on windows...
+  if (NOT WIN32)
   foreach(LAUNCH_FILE ${LAUNCH_FILES})
     roslaunch_add_file_check(${LAUNCH_FILE} USE_TEST_DEPENDENCIES)
   endforeach()
+  endif()
   
   catkin_download_test_data(
     ${PROJECT_NAME}_4markers_tork.bag
@@ -176,8 +216,8 @@ if (CATKIN_ENABLE_TESTING)
     DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/test
     MD5 627aa0316bbfe4334e06023d7c2b4087
    )
-  add_rostest(test/marker_arg_config-basic.test DEPENDENCIES ${PROJECT_NAME}_4markers_tork.bag)
-  add_rostest(test/marker_arg_config-full.test DEPENDENCIES ${PROJECT_NAME}_4markers_tork.bag)
-  add_rostest(test/marker_param_config-basic.test DEPENDENCIES ${PROJECT_NAME}_4markers_tork.bag)
-  add_rostest(test/marker_param_config-full.test DEPENDENCIES ${PROJECT_NAME}_4markers_tork.bag)
+    add_rostest(test/marker_arg_config-basic.test DEPENDENCIES ${PROJECT_NAME}_4markers_tork.bag)
+    add_rostest(test/marker_arg_config-full.test DEPENDENCIES ${PROJECT_NAME}_4markers_tork.bag)
+    add_rostest(test/marker_param_config-basic.test DEPENDENCIES ${PROJECT_NAME}_4markers_tork.bag)
+    add_rostest(test/marker_param_config-full.test DEPENDENCIES ${PROJECT_NAME}_4markers_tork.bag)
 endif()
